@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Простой конструктор сайтов</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="toolbar">
+            <h1>Простой конструктор</h1>
+            <div class="toolbar-actions">
+                <button id="save-btn"><i class="fas fa-save"></i> Сохранить</button>
+                <button id="preview-btn"><i class="fas fa-eye"></i> Превью</button>
+                <button id="publish-btn"><i class="fas fa-cloud-upload-alt"></i> Опубликовать</button>
+            </div>
+        </header>
+        
+        <div class="workspace">
+            <aside class="components-panel">
+                <h2>Компоненты</h2>
+                <div class="component" draggable="true" data-type="header">
+                    <i class="fas fa-heading"></i> Заголовок
+                </div>
+                <div class="component" draggable="true" data-type="text">
+                    <i class="fas fa-paragraph"></i> Текст
+                </div>
+                <div class="component" draggable="true" data-type="image">
+                    <i class="fas fa-image"></i> Изображение
+                </div>
+                <div class="component" draggable="true" data-type="button">
+                    <i class="fas fa-hand-pointer"></i> Кнопка
+                </div>
+                <div class="component" draggable="true" data-type="video">
+                    <i class="fas fa-video"></i> Видео
+                </div>
+                <div class="component" draggable="true" data-type="columns">
+                    <i class="fas fa-columns"></i> Колонки
+                </div>
+            </aside>
+            
+            <main class="editor-area" id="editor">
+                <div class="page-container" id="page-container">
+                    <!-- Здесь будут добавляться компоненты -->
+                </div>
+            </main>
+            
+            <aside class="properties-panel">
+                <h2>Свойства</h2>
+                <div id="properties-content">
+                    <p>Выберите элемент для редактирования</p>
+                </div>
+            </aside>
+        </div>
+    </div>
+    
+    <!-- Модальное окно для настроек -->
+    <div class="modal" id="settings-modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Настройки элемента</h2>
+            <div id="modal-form"></div>
+            <button id="apply-changes">Применить</button>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
