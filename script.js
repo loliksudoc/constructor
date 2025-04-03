@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Состояние редактора
     let selectedElement = null;
     let isDragging = false;
     let offsetX, offsetY;
@@ -9,42 +8,34 @@ document.addEventListener('DOMContentLoaded', function() {
     const propertiesPanel = document.getElementById('properties-content');
     const settingsModal = document.getElementById('settings-modal');
     const modalForm = document.getElementById('modal-form');
-    
-    // История изменений для undo/redo
+
     const stateHistory = [];
     let currentStateIndex = -1;
     
-    // Инициализация
     saveState();
     
-    // Сохранение состояния
     function saveState() {
-        // Удаляем все состояния после текущего
         stateHistory.splice(currentStateIndex + 1);
         
-        // Сохраняем текущее состояние
         stateHistory.push({
             html: pageContainer.innerHTML,
             bgColor: pageContainer.style.backgroundColor
         });
         currentStateIndex = stateHistory.length - 1;
-        
-        // Ограничиваем историю 20 шагами
+
         if (stateHistory.length > 20) {
             stateHistory.shift();
             currentStateIndex--;
         }
     }
-    
-    // Отмена действия (Ctrl+Z)
+
     function undo() {
         if (currentStateIndex > 0) {
             currentStateIndex--;
             restoreState();
         }
     }
-    
-    // Повтор действия (Ctrl+X)
+
     function redo() {
         if (currentStateIndex < stateHistory.length - 1) {
             currentStateIndex++;
@@ -52,15 +43,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Восстановление состояния
     function restoreState() {
         const state = stateHistory[currentStateIndex];
         pageContainer.innerHTML = state.html;
         pageContainer.style.backgroundColor = state.bgColor;
         rebindElements();
     }
-    
-    // Перепривязка событий после undo/redo
+
     function rebindElements() {
         document.querySelectorAll('.editor-element').forEach(element => {
             element.addEventListener('mousedown', startDrag);
@@ -79,8 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (updateButtonBtn) updateButtonBtn.addEventListener('click', updateButton);
         });
     }
-    
-    // Обработчики клавиш
+
     document.addEventListener('keydown', function(e) {
         if (e.ctrlKey) {
             if (e.key === 'z') {
@@ -92,15 +80,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-    
-    // Инициализация Drag and Drop для компонентов
+
     document.querySelectorAll('.component').forEach(comp => {
         comp.addEventListener('dragstart', function(e) {
             e.dataTransfer.setData('type', this.dataset.type);
         });
     });
 
-    // Функции для перемещения элементов
     function startDrag(e) {
         if (e.target.closest('.element-actions')) return;
         
@@ -110,13 +96,11 @@ document.addEventListener('DOMContentLoaded', function() {
         isDragging = true;
         currentDraggedElement = element;
         selectElement(element);
-        
-        // Вычисляем смещение курсора относительно элемента
+
         const rect = element.getBoundingClientRect();
         offsetX = e.clientX - rect.left;
         offsetY = e.clientY - rect.top;
-        
-        // Визуальные изменения при перетаскивании
+
         element.style.cursor = 'grabbing';
         element.style.opacity = '0.8';
         element.style.zIndex = '1000';
@@ -127,17 +111,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function dragElement(e) {
         if (!isDragging || !currentDraggedElement) return;
-        
-        // Вычисляем новые координаты
+
         const editorRect = editor.getBoundingClientRect();
         let newX = e.clientX - editorRect.left - offsetX;
         let newY = e.clientY - editorRect.top - offsetY;
-        
-        // Ограничиваем перемещение в пределах редактора
+
         newX = Math.max(0, Math.min(newX, editorRect.width - currentDraggedElement.offsetWidth));
         newY = Math.max(0, Math.min(newY, editorRect.height - currentDraggedElement.offsetHeight));
-        
-        // Применяем новые координаты
+
         currentDraggedElement.style.left = `${newX}px`;
         currentDraggedElement.style.top = `${newY}px`;
     }
@@ -168,7 +149,6 @@ document.addEventListener('DOMContentLoaded', function() {
         saveState();
     });
 
-    // Создание элементов
     function createElement(type, x, y) {
         const element = document.createElement('div');
         element.className = `editor-element element-${type}`;
@@ -235,11 +215,9 @@ document.addEventListener('DOMContentLoaded', function() {
         element.style.top = `${yPos}px`;
         element.style.cursor = 'grab';
         pageContainer.appendChild(element);
-        
-        // Назначение обработчиков
+
         addElementEventListeners(element);
-        
-        // Специальные обработчики для изображений и кнопок
+
         if (type === 'image') {
             element.querySelector('.update-image-btn').addEventListener('click', updateImage);
         }
@@ -250,8 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         selectElement(element);
     }
-    
-    // Добавление обработчиков для элемента
+
     function addElementEventListeners(element) {
         element.addEventListener('mousedown', startDrag);
         element.addEventListener('click', handleElementClick);
@@ -262,16 +239,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const deleteBtn = element.querySelector('.delete-btn');
         if (deleteBtn) deleteBtn.addEventListener('click', handleDelete);
     }
-    
-    // Обработчик клика по элементу
+
     function handleElementClick(e) {
         if (!e.target.closest('.element-actions')) {
             const element = e.target.closest('.editor-element');
             if (element) selectElement(element);
         }
     }
-    
-    // Обработчик удаления элемента
+
     function handleDelete() {
         const element = this.closest('.editor-element');
         if (element) {
@@ -282,7 +257,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Обновление изображения
     function updateImage() {
         const element = this.closest('.editor-element');
         const urlInput = element.querySelector('.image-url-input');
@@ -293,8 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
             saveState();
         }
     }
-    
-    // Обновление кнопки
+
     function updateButton() {
         const element = this.closest('.editor-element');
         const linkInput = element.querySelector('.button-link-input');
@@ -305,8 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (textInput.value) button.textContent = textInput.value;
         saveState();
     }
-    
-    // Выбор элемента
+
     function selectElement(element) {
         if (isDragging) return;
         
@@ -318,8 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
         element.classList.add('selected');
         showElementProperties(element);
     }
-    
-    // Панель свойств
+
     function showElementProperties(element) {
         const type = element.dataset.type;
         
@@ -410,8 +381,7 @@ document.addEventListener('DOMContentLoaded', function() {
             saveState();
         });
     }
-    
-    // Модальное окно настроек
+
     function openSettingsModal(element) {
         const type = element.dataset.type;
         let modalHTML = '';
@@ -502,120 +472,120 @@ document.addEventListener('DOMContentLoaded', function() {
             saveState();
         };
     }
-    
-    // Закрытие модального окна
+
     document.querySelector('.close-btn').addEventListener('click', () => {
         settingsModal.style.display = 'none';
     });
-    
-    // Кнопки undo/redo в тулбаре
+
     document.getElementById('undo-btn').addEventListener('click', undo);
     document.getElementById('redo-btn').addEventListener('click', redo);
-    
-    // Инициализация
+
     showDefaultProperties();
     rebindElements();
 });
 
 document.getElementById('save-btn').addEventListener('click', function() {
+    const projectName = prompt("Введите название проекта:", "Мой сайт " + new Date().toLocaleDateString());
+    if (!projectName) return;
+
     const projectData = {
-        html: pageContainer.innerHTML,
-        styles: pageContainer.style.cssText,
-        timestamp: new Date().getTime()
+        name: projectName,
+        html: document.getElementById('page-container').innerHTML,
+        css: getComputedStyle(document.documentElement).cssText,
+        date: new Date().toISOString()
     };
-    
-    localStorage.setItem('websiteProject', JSON.stringify(projectData));
-    
-    // Визуальная обратная связь
-    const btn = this;
-    btn.innerHTML = '<i class="fas fa-check"></i> Сохранено';
+
+    localStorage.setItem('websiteProject_' + projectName, JSON.stringify(projectData));
+
+    this.innerHTML = '<i class="fas fa-check"></i> Сохранено!';
     setTimeout(() => {
-        btn.innerHTML = '<i class="fas fa-save"></i> Сохранить';
+        this.innerHTML = '<i class="fas fa-save"></i> Сохранить';
     }, 2000);
+
+    updateProjectsList();
 });
 
-// Реализация кнопки Превью
 document.getElementById('preview-btn').addEventListener('click', function() {
-    const previewWindow = window.open('', '_blank');
+    const previewWindow = window.open('', 'previewWindow', 'width=1200,height=800');
+    
+    const pageContent = document.getElementById('page-container').innerHTML;
+    const styles = Array.from(document.styleSheets)
+        .map(sheet => {
+            try {
+                return Array.from(sheet.cssRules).map(rule => rule.cssText).join('\n');
+            } catch (e) {
+                return '';
+            }
+        }).join('\n');
+    
     previewWindow.document.write(`
         <!DOCTYPE html>
         <html>
         <head>
             <title>Превью сайта</title>
-            <style>
-                body { margin: 0; font-family: Arial, sans-serif; }
-                .preview-container { 
-                    max-width: 1200px; 
-                    margin: 0 auto; 
-                    padding: 20px; 
-                }
-            </style>
+            <style>${styles}</style>
         </head>
         <body>
-            <div class="preview-container">
-                ${pageContainer.innerHTML}
-            </div>
+            ${pageContent}
         </body>
         </html>
     `);
     previewWindow.document.close();
+
+    this.innerHTML = '<i class="fas fa-check"></i> Превью открыто!';
+    setTimeout(() => {
+        this.innerHTML = '<i class="fas fa-eye"></i> Превью';
+    }, 2000);
 });
 
-// Реализация кнопки Опубликовать
 document.getElementById('publish-btn').addEventListener('click', function() {
-    // Создаем модальное окно
-    const modal = document.createElement('div');
-    modal.className = 'publish-modal';
-    modal.innerHTML = `
-        <div class="publish-modal-content">
-            <h3>Опубликовать сайт</h3>
-            <p>Ваш сайт будет доступен по адресу:</p>
-            <div class="publish-url" id="publish-url"></div>
-            <button id="confirm-publish">Опубликовать</button>
-            <button id="cancel-publish">Отмена</button>
-        </div>
+    const projectName = prompt("Введите название для публикации:", "Мой сайт");
+    if (!projectName) return;
+
+    const projectData = {
+        name: projectName,
+        html: document.getElementById('page-container').innerHTML,
+        date: new Date().toISOString(),
+        published: true
+    };
+
+    localStorage.setItem('publishedProject_' + projectName, JSON.stringify(projectData));
+    
+
+    const projectUrl = `https://loliksudoc.github.io/constructor/?project=${encodeURIComponent(projectName)}`;
+
+    const publishInfo = document.createElement('div');
+    publishInfo.className = 'publish-info';
+    publishInfo.innerHTML = `
+        <h3>Ваш сайт опубликован!</h3>
+        <p>Доступен по адресу:</p>
+        <a href="${projectUrl}" target="_blank">${projectUrl}</a>
+        <button onclick="this.parentElement.remove()">Закрыть</button>
     `;
-    document.body.appendChild(modal);
-    
-    // Генерируем случайный ID проекта
-    const projectId = 'project-' + Math.random().toString(36).substr(2, 9);
-    document.getElementById('publish-url').textContent = 
-        `https://mysitebuilder.com/${projectId}`;
-    
-    // Показываем модальное окно
-    modal.style.display = 'flex';
-    
-    // Обработчики кнопок
-    document.getElementById('confirm-publish').addEventListener('click', function() {
-        const btn = this;
-        btn.classList.add('publishing');
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Публикация...';
-        
-        // Здесь должна быть реальная логика публикации на сервере
-        // Для демо используем setTimeout
-        setTimeout(() => {
-            modal.style.display = 'none';
-            document.body.removeChild(modal);
-            
-            // Визуальная обратная связь
-            const publishBtn = document.getElementById('publish-btn');
-            publishBtn.innerHTML = '<i class="fas fa-check"></i> Опубликовано';
-            setTimeout(() => {
-                publishBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Опубликовать';
-            }, 2000);
-            
-            // В реальном приложении здесь был бы редирект или уведомление
-            alert(`Сайт опубликован! Доступен по адресу: https://mysitebuilder.com/${projectId}`);
-        }, 1500);
-    });
-    
-    document.getElementById('cancel-publish').addEventListener('click', function() {
-        modal.style.display = 'none';
-        document.body.removeChild(modal);
-    });
+    document.body.appendChild(publishInfo);
+
+    this.innerHTML = '<i class="fas fa-check"></i> Опубликовано!';
+    setTimeout(() => {
+        this.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Опубликовать';
+    }, 2000);
 });
 
-// Улучшенный компонент для добавления фото
+function loadProject(projectName) {
+    const projectData = JSON.parse(localStorage.getItem('websiteProject_' + projectName));
+    if (projectData) {
+        document.getElementById('page-container').innerHTML = projectData.html;
+        alert(`Проект "${projectData.name}" загружен!`);
+    }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectName = urlParams.get('project');
+    if (projectName) {
+        loadProject(projectName);
+    }
+});
+
 function createImageElement(x, y) {
     const element = document.createElement('div');
     element.className = 'editor-element element-image';
@@ -643,8 +613,7 @@ function createImageElement(x, y) {
     element.style.left = `${xPos}px`;
     element.style.top = `${yPos}px`;
     pageContainer.appendChild(element);
-    
-    // Обработчик загрузки изображения
+
     const uploadInput = element.querySelector('.image-upload-input');
     const imagePreview = element.querySelector('.image-preview');
     
@@ -661,7 +630,6 @@ function createImageElement(x, y) {
         }
     });
     
-    // Добавляем обработчики событий
     addElementEventListeners(element);
     selectElement(element);
     saveState();
@@ -676,56 +644,10 @@ document.getElementById('save-btn').addEventListener('click', function() {
     };
     
     localStorage.setItem('savedProject', JSON.stringify(project));
-    
-    // Визуальный фидбэк
+
     const originalText = this.innerHTML;
     this.innerHTML = '<i class="fas fa-check"></i> Сохранено!';
     setTimeout(() => {
         this.innerHTML = originalText;
     }, 2000);
-});
-
-// Превью проекта
-document.getElementById('preview-btn').addEventListener('click', function() {
-    const previewWindow = window.open('', '_blank');
-    previewWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Превью проекта</title>
-            <style>
-                ${document.querySelector('style').innerHTML}
-                body { background-color: ${pageContainer.style.backgroundColor}; }
-            </style>
-        </head>
-        <body>
-            ${pageContainer.innerHTML}
-        </body>
-        </html>
-    `);
-    previewWindow.document.close();
-});
-
-// Публикация проекта
-document.getElementById('publish-btn').addEventListener('click', function() {
-    // Генерируем случайный ID проекта
-    const projectId = 'project-' + Math.random().toString(36).substr(2, 9);
-    
-    // В реальном приложении здесь был бы AJAX-запрос к серверу
-    console.log('Публикация проекта с ID:', projectId);
-    
-    // Имитация публикации
-    const originalText = this.innerHTML;
-    this.disabled = true;
-    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Публикация...';
-    
-    setTimeout(() => {
-        this.innerHTML = '<i class="fas fa-check"></i> Опубликовано!';
-        alert(`Ваш сайт опубликован по адресу: https://mysitebuilder.com/${projectId}`);
-        
-        setTimeout(() => {
-            this.innerHTML = originalText;
-            this.disabled = false;
-        }, 3000);
-    }, 1500);
 });
